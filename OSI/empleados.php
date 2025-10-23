@@ -86,12 +86,12 @@
 </head>
 <body>
 
-  <?php include('header.php'); ?>
+  <?php include('../header.php'); ?>
   <hr>
 
   <div class="grid-container">
   <?php
-include('Logica/sql.php'); 
+include('../Logica/sql.php'); 
 
 $trabajador = obtenerTabajadores();
 

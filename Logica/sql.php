@@ -356,36 +356,22 @@ function obtenerInmueblePorId($idInmueble) {
 
 function obtenerTabajadoresPorId($idTrabajador) {
     $conexion = Conectarse();
-    if (!$conexion) {
+    if (!$conexion) return null;
+
+    $consulta = "SELECT idTrabajador, Nombre, Apellido, Usuario, Telefono, Correo, idCargo, idRol 
+                 FROM trabajador WHERE idTrabajador = ? AND is_deleted = 0";
+    $stmt = $conexion->prepare($consulta);
+    if (!$stmt) {
+        mysqli_close($conexion);
         return null;
     }
-
-    $consulta = "
-        SELECT 
-            T.idTrabajador,
-            T.nombre,
-            T.telefono,
-            T.correo
-        FROM 
-            Trabajador T
-        WHERE 
-            T.idTrabajador = ?";
-
-    $stmt = $conexion->prepare($consulta);
     $stmt->bind_param("i", $idTrabajador);
     $stmt->execute();
     $resultado = $stmt->get_result();
-
-    if ($resultado->num_rows > 0) {
-        $idTrabajador = $resultado->fetch_assoc();
-    } else {
-        $idTrabajador = null;
-    }
-
+    $trabajador = $resultado->num_rows > 0 ? $resultado->fetch_assoc() : null;
     $stmt->close();
     mysqli_close($conexion);
-    
-    return $idTrabajador;
+    return $trabajador;
 }
 
 function obtenerCitasVigentes() {

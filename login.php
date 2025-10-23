@@ -75,13 +75,13 @@
             unset($_SESSION['error']);
         }
         ?>
-        <form action="procesarLogin.php" method="POST">
-            <input type="text" name="text" placeholder="Usuario" required>
+        <form action="Logica/procesarLogin.php" method="POST">
+            <input type="text" name="usuario" placeholder="Usuario" required>
             <input type="password" name="password" placeholder="Contraseña" required>
             <button type="submit">Iniciar Sesión</button>
         </form>
         <div class="register-link">
-            ¿No tienes cuenta? <a href="registro.php">Regístrate aquí</a>
+            ¿No tienes cuenta? <a href="registroCliente.php">Regístrate aquí</a>
         </div>
     </div>
 </body>
