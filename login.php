@@ -100,12 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
         <h2>🔒 Iniciar Sesión</h2>
         <form action="login.php" method="POST">
             <input type="text" name="usuario" placeholder="Usuario" required><br>
-            <input type="password" name="password" placeholder="Contraseña" required><br>
+            <input type="password" name="password" placeholder="Contraseña" required><br><br>
             <div class="g-recaptcha" data-sitekey="<?= $_ENV['RECAPTCHA_SITE_KEY'] ?>"></div><br>
             <button type="submit">Iniciar Sesión</button>
         </form>
         <br>
-        <a href="recuperar.php">¿Olvidaste tu contraseña?</a>
+        <a href="recover.php">¿Olvidaste tu contraseña?</a>
         <br><br>
         <div class="register-link">
             ¿No tienes cuenta? <a href="registro.php">Regístrate aquí</a>

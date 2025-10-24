@@ -492,6 +492,10 @@ ALTER TABLE `cita`
 ALTER TABLE `cliente`
   MODIFY `idCliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 --
+ALTER TABLE `cliente`
+ADD COLUMN `token` VARCHAR(255) DEFAULT NULL,
+ADD COLUMN `token_expira` DATETIME DEFAULT NULL;
+--
 -- AUTO_INCREMENT de la tabla `estado`
 --
 ALTER TABLE `estado`
