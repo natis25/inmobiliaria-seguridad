@@ -1,4 +1,4 @@
-```php
+
 <?php
 // Helpers comunes para registro de identidades
 
@@ -79,6 +79,37 @@ function build_codigo_cliente($id, ?DateTime $ts=null){
   $fecha = $ts->format('Ymd');
   $seq = str_pad((string)$id, 6, '0', STR_PAD_LEFT);
   return "CLI-{$fecha}-{$seq}";
+}
+
+// Código estándar del empleado: EMP-YYYYMMDD-######
+function build_codigo_empleado($id, ?DateTime $ts=null){
+  $ts = $ts ?: new DateTime('now');
+  $fecha = $ts->format('Ymd');
+  $seq = str_pad((string)$id, 6, '0', STR_PAD_LEFT);
+  return "EMP-{$fecha}-{$seq}";
+}
+
+// Genera contraseña temporal que cumple reglas (12+; may/min/num/símbolo)
+// basada en frase corta para memorización temporal
+function generar_password_temporal(): string {
+  // lista mínima de palabras “memorizables”; puedes cambiar por vocabulario interno
+  $palabras = ['Valle','Roca','Andes','Sol','Luna','Puma','Quilla','Condor','Killa','Inti'];
+  $p = $palabras[random_int(0, count($palabras)-1)];
+  $num = (string)random_int(100, 999);         // 3 dígitos
+  $sym = str_split('@#$%&*?')[random_int(0,6)]; // 1 símbolo
+  // Ensamble: Palabra con mayúscula + minúsculas + dígitos + símbolo + sufijo de letras minúsculas
+  $suf = substr(bin2hex(random_bytes(3)), 0, 3); // 3 min chars
+  $pwd = $p . strtolower($p[0]) . $num . $sym . $suf; 
+  // Garantiza reglas:
+  // - mayúscula: $p tiene mayúscula inicial
+  // - minúscula: strtolower($p[0]) y $suf
+  // - número: $num
+  // - símbolo: $sym
+  // - 12+: típico queda 1ªPalabra(>=4) + 1 + 3 + 1 + 3 >= 12
+  if (strlen($pwd) < 12) { // por si acaso, relleno
+    $pwd .= substr(bin2hex(random_bytes(2)),0,2);
+  }
+  return $pwd;
 }
 
 // Busca un username disponible agregando sufijo -i si hace falta (sin tocar esquema)
