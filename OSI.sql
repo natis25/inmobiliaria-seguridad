@@ -167,3 +167,8 @@ JOIN rol_permiso rp ON t.idRol = rp.idRol;
 
 
 ------- Contrasena del OSI: KamiJime21Marti03.?
+
+
+------Usuario identificador unico para trabajador y cliente
+ALTER TABLE trabajador ADD COLUMN CodigoUsuario VARCHAR(20) UNIQUE AFTER idTrabajador;
+ALTER TABLE cliente ADD COLUMN CodigoUsuario VARCHAR(20) UNIQUE AFTER idCliente;

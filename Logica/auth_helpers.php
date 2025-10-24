@@ -1,3 +1,4 @@
+```php
 <?php
 // Helpers comunes para registro de identidades
 
@@ -21,24 +22,63 @@ function norm_words($s){
   return trim(preg_replace('/\s+/',' ', $s));
 }
 
-function build_username_base($nombre,$apellido){
-  $n = explode(' ', norm_words($nombre));
-  $a = explode(' ', norm_words($apellido));
-  $first = preg_replace('/[^a-z]/','', $n[0] ?? '');
-  $last  = preg_replace('/[^a-z]/','', (end($a) ?: ''));
-  $u = ($first && $last) ? ($first.'.'.$last) : ($first ?: $last);
-  $u = preg_replace('/\.+/','.', $u);
-  return trim($u, '.');
+function first_word($s){ $w = explode(' ', norm_words($s)); return preg_replace('/[^a-z]/','', $w[0] ?? ''); }
+function last_word($s){ $w = explode(' ', norm_words($s)); $x = end($w) ?: ''; return preg_replace('/[^a-z]/','', $x); }
+function initial($s){ $x = last_word($s); return $x !== '' ? $x[0] : ''; }
+
+// Genera cadena candidata de usuario según reglas
+function username_candidates($nombre,$ap1,$ap2){
+  $n  = first_word($nombre);
+  $p  = last_word($ap1);
+  $s  = last_word($ap2);
+  $ni = $n !== '' ? $n[0] : '';
+  $si = initial($ap2);
+
+  $cands = [];
+  if ($n && $p)           $cands[] = "{$n}.{$p}";              // juan.perez
+  if ($n && $s)           $cands[] = "{$n}.{$s}";              // juan.gomez
+  if ($n && $p && $si)    $cands[] = "{$n}.{$p}{$si}";         // juan.perezg
+  if ($ni && $p && $si)   $cands[] = "{$ni}.{$p}{$si}";        // j.perezg
+  if ($n)                 $cands[] = $n;                       // juan (fallback)
+  return array_values(array_unique($cands));
 }
 
-function sanitize_username_input($user,$nombre,$apellido){
-  $u = strip_accents(mb_strtolower($user,'UTF-8'));
-  $u = preg_replace(['/[^a-z0-9\.]/','/\.+/'],['','.' ],$u);
-  $u = trim($u,'.');
-  if ($u==='' || !preg_match('/^[a-z]+(\.[a-z0-9]+)*$/',$u)) {
-    $u = build_username_base($nombre,$apellido) ?: 'usuario';
+// Busca el primer username disponible de la lista; si ninguno, agrega sufijo -i
+function username_unico_from_candidates($db, array $cands, $table){
+  // prueba candidatos
+  foreach ($cands as $u) {
+    $stmt = $db->prepare("SELECT 1 FROM {$table} WHERE Usuario=? LIMIT 1");
+    $stmt->bind_param('s',$u); $stmt->execute(); $stmt->store_result();
+    $ok = ($stmt->num_rows===0);
+    $stmt->close();
+    if ($ok) return $u;
   }
-  return $u;
+  // si todos ocupados, usa el primero con sufijo incremental
+  $base = $cands[0] ?? 'usuario';
+  return username_unico($db, $base, $table);
+}
+
+// API pública para el proceso
+function generar_usuario_estandarizado($db, $nombre, $ap1, $ap2, $table){
+  $list = username_candidates($nombre,$ap1,$ap2);
+  // limpieza final por si acaso
+  $list = array_map(function($u){
+    $u = strip_accents($u);
+    $u = preg_replace(['/[^a-z0-9\.]/','/\.+/'],['','.' ],$u);
+    return trim($u,'.');
+  }, $list);
+  // garantía de formato
+  $list = array_values(array_filter($list, fn($u)=>preg_match('/^[a-z]+(\.[a-z0-9]+)*$/',$u)));
+  if (!$list) $list = ['usuario'];
+  return username_unico_from_candidates($db, $list, $table);
+}
+
+// Código estándar del cliente: CLI-YYYYMMDD-###### (id acolchado)
+function build_codigo_cliente($id, ?DateTime $ts=null){
+  $ts = $ts ?: new DateTime('now');
+  $fecha = $ts->format('Ymd');
+  $seq = str_pad((string)$id, 6, '0', STR_PAD_LEFT);
+  return "CLI-{$fecha}-{$seq}";
 }
 
 // Busca un username disponible agregando sufijo -i si hace falta (sin tocar esquema)
