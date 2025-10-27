@@ -126,105 +126,195 @@ CREATE TABLE vivienda (
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =========================
--- Identidades (sin contraseñas en claro)
--- =========================
-CREATE TABLE trabajador (
-  idTrabajador INT(11) NOT NULL AUTO_INCREMENT,
-  Nombre VARCHAR(100) NOT NULL,
-  Apellido VARCHAR(100) NOT NULL,
-  Usuario VARCHAR(100) NOT NULL,
-  Telefono CHAR(8) NOT NULL,
-  Correo VARCHAR(100) NOT NULL,
-  idCargo INT NULL,
-  idRol INT NULL,
-  EstadoCuenta ENUM('Activo','Bloqueado') NOT NULL DEFAULT 'Activo',
-  IntentosFallidos INT NOT NULL DEFAULT 0,
-  locked_at DATETIME NULL,
-  last_login_at DATETIME NULL,
-  password_expires_at DATETIME NULL,
-  is_deleted TINYINT(1) NOT NULL DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (idTrabajador),
-  UNIQUE KEY uq_trabajador_usuario (Usuario),
-  UNIQUE KEY uq_trabajador_correo (Correo),
-  KEY idx_trabajador_cargo (idCargo),
-  KEY idx_trabajador_rol (idRol),
-  CONSTRAINT fk_trabajador_cargo
-    FOREIGN KEY (idCargo) REFERENCES cargo(idCargo)
-    ON UPDATE CASCADE ON DELETE SET NULL,
-  CONSTRAINT fk_trabajador_rol
-    FOREIGN KEY (idRol) REFERENCES rol(idRol)
-    ON UPDATE CASCADE ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- --------------------------------------------------------
 
-CREATE TABLE cliente (
-  idCliente INT(11) NOT NULL AUTO_INCREMENT,
-  Nombre VARCHAR(100) NOT NULL,
-  Apellido VARCHAR(100) NOT NULL,
-  Usuario VARCHAR(100) NOT NULL,
-  Correo VARCHAR(100) NOT NULL,
-  Telefono CHAR(8) NOT NULL,
-  Direccion VARCHAR(150) NOT NULL,
-  EstadoCuenta ENUM('Activo','Bloqueado') NOT NULL DEFAULT 'Activo',
-  IntentosFallidos INT NOT NULL DEFAULT 0,
-  locked_at DATETIME NULL,
-  last_login_at DATETIME NULL,
-  password_expires_at DATETIME NULL,
-  is_deleted TINYINT(1) NOT NULL DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (idCliente),
-  UNIQUE KEY uq_cliente_usuario (Usuario),
-  UNIQUE KEY uq_cliente_correo (Correo),
-  KEY idx_cliente_estado (EstadoCuenta)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+--
+-- Estructura de tabla para la tabla `zonas`
+--
 
--- =========================
--- Operación (citas)
--- =========================
-CREATE TABLE cita (
-  idCita INT(11) NOT NULL AUTO_INCREMENT,
-  FechaVisita DATE NOT NULL,
-  FechaTrato DATE DEFAULT NULL,
-  HoraInicio TIME NOT NULL,
-  HoraFin TIME NOT NULL,
-  esTrato TINYINT(1) DEFAULT NULL,
-  MontoOfrecido DECIMAL(50,5) DEFAULT NULL,
-  Trabajador_idTrabajador INT(11) DEFAULT NULL,
-  Estado_idEstado INT(11) NOT NULL,
-  Vivienda_idVivienda INT(11) NOT NULL,
-  Cliente_idCliente INT(11) NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (idCita),
-  KEY idx_cita_cliente (Cliente_idCliente),
-  KEY idx_cita_estado (Estado_idEstado),
-  KEY idx_cita_trab (Trabajador_idTrabajador),
-  KEY idx_cita_viv (Vivienda_idVivienda),
-  CONSTRAINT fk_cita_cliente
-    FOREIGN KEY (Cliente_idCliente) REFERENCES cliente(idCliente)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT fk_cita_estado
-    FOREIGN KEY (Estado_idEstado) REFERENCES estado(idEstado)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT fk_cita_trabajador
-    FOREIGN KEY (Trabajador_idTrabajador) REFERENCES trabajador(idTrabajador)
-    ON UPDATE CASCADE ON DELETE SET NULL,
-  CONSTRAINT fk_cita_vivienda
-    FOREIGN KEY (Vivienda_idVivienda) REFERENCES vivienda(idVivienda)
-    ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `zonas` (
+  `idZona` int(11) NOT NULL,
+  `Zona` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- =========================
--- Histórico de contraseñas (solo HASH)
--- =========================
-CREATE TABLE password_history (
-  idHistorial INT AUTO_INCREMENT PRIMARY KEY,
-  user_type ENUM('trabajador','cliente') NOT NULL,
-  user_id INT NOT NULL,
-  PasswordHash VARCHAR(255) NOT NULL,
-  FechaCambio DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_pwdhist_user (user_type, user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+--
+-- Volcado de datos para la tabla `zonas`
+--
+
+INSERT INTO `zonas` (`idZona`, `Zona`) VALUES
+(1, 'Achumani'),
+(2, 'Calacoto'),
+(3, 'Sopocachi'),
+(4, 'Irpavi'),
+(5, 'Centro'),
+(6, 'Miraflores'),
+(7, 'Cota Cota'),
+(8, 'Los Pinos'),
+(9, 'Obrajes'),
+(10, 'La Florida'),
+(11, 'Río Abajo'),
+(12, 'Mallasilla'),
+(13, 'Alto Irpavi'),
+(14, 'Ovejuyo'),
+(15, 'San Jorge'),
+(16, 'Aranjuez'),
+(17, 'Umamanta'),
+(18, 'Auquisamaña'),
+(19, 'Pura Pura'),
+(20, 'Villa Copacabana'),
+(21, 'San Miguel'),
+(22, 'Pasankeri'),
+(23, 'Villa El Carmen'),
+(24, 'Urb. Autopista'),
+(25, 'Bella Vista'),
+(26, 'El Pedregal'),
+(27, 'San Alberto'),
+(28, 'Pampahasi'),
+(29, 'Achocalla'),
+(30, 'Alto Obrajes'),
+(31, 'Bolognia'),
+(32, 'Chasquipampa'),
+(33, 'Chuquiaguillo'),
+(34, 'El Tejar'),
+(35, 'Koani'),
+(36, 'Llojeta'),
+(37, 'Mecapaca'),
+(38, 'San Pedro'),
+(39, 'Seguencoma'),
+(40, 'Tembladerani'),
+(41, 'Achachicala'),
+(42, 'Villa Fatima'),
+(43, 'Villa San Antonio'),
+(44, 'Mallasa');
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `cita`
+--
+ALTER TABLE `cita`
+  ADD PRIMARY KEY (`idCita`),
+  ADD KEY `Cita_Cliente` (`Cliente_idCliente`),
+  ADD KEY `Cita_Estado` (`Estado_idEstado`),
+  ADD KEY `Cita_Trabajador` (`Trabajador_idTrabajador`),
+  ADD KEY `Cita_Vivienda` (`Vivienda_idVivienda`);
+
+--
+-- Indices de la tabla `cliente`
+--
+ALTER TABLE `cliente`
+  ADD PRIMARY KEY (`idCliente`);
+
+--
+-- Indices de la tabla `estado`
+--
+ALTER TABLE `estado`
+  ADD PRIMARY KEY (`idEstado`);
+
+--
+-- Indices de la tabla `tipooferta`
+--
+ALTER TABLE `tipooferta`
+  ADD PRIMARY KEY (`idTipoO`);
+
+--
+-- Indices de la tabla `tipovivienda`
+--
+ALTER TABLE `tipovivienda`
+  ADD PRIMARY KEY (`idTipoV`);
+
+--
+-- Indices de la tabla `trabajador`
+--
+ALTER TABLE `trabajador`
+  ADD PRIMARY KEY (`idTrabajador`);
+
+--
+-- Indices de la tabla `vivienda`
+--
+ALTER TABLE `vivienda`
+  ADD PRIMARY KEY (`idVivienda`),
+  ADD KEY `Vivienda_TipoOferta` (`TipoOferta_idTipoO`),
+  ADD KEY `Vivienda_TipoVivienda` (`TipoVivienda_idTipoV`),
+  ADD KEY `Vivienda_Zonas` (`Zonas_idZona`);
+
+--
+-- Indices de la tabla `zonas`
+--
+ALTER TABLE `zonas`
+  ADD PRIMARY KEY (`idZona`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `cita`
+--
+ALTER TABLE `cita`
+  MODIFY `idCita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+--
+-- AUTO_INCREMENT de la tabla `cliente`
+--
+ALTER TABLE `cliente`
+  MODIFY `idCliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+--
+ALTER TABLE `cliente`
+ADD COLUMN `token` VARCHAR(255) DEFAULT NULL,
+ADD COLUMN `token_expira` DATETIME DEFAULT NULL;
+--
+-- AUTO_INCREMENT de la tabla `estado`
+--
+ALTER TABLE `estado`
+  MODIFY `idEstado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+--
+-- AUTO_INCREMENT de la tabla `tipooferta`
+--
+ALTER TABLE `tipooferta`
+  MODIFY `idTipoO` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+--
+-- AUTO_INCREMENT de la tabla `tipovivienda`
+--
+ALTER TABLE `tipovivienda`
+  MODIFY `idTipoV` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+--
+-- AUTO_INCREMENT de la tabla `trabajador`
+--
+ALTER TABLE `trabajador`
+  MODIFY `idTrabajador` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+--
+-- AUTO_INCREMENT de la tabla `vivienda`
+--
+ALTER TABLE `vivienda`
+  MODIFY `idVivienda` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+--
+-- AUTO_INCREMENT de la tabla `zonas`
+--
+ALTER TABLE `zonas`
+  MODIFY `idZona` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `cita`
+--
+ALTER TABLE `cita`
+  ADD CONSTRAINT `Cita_Cliente` FOREIGN KEY (`Cliente_idCliente`) REFERENCES `cliente` (`idCliente`),
+  ADD CONSTRAINT `Cita_Estado` FOREIGN KEY (`Estado_idEstado`) REFERENCES `estado` (`idEstado`),
+  ADD CONSTRAINT `Cita_Trabajador` FOREIGN KEY (`Trabajador_idTrabajador`) REFERENCES `trabajador` (`idTrabajador`),
+  ADD CONSTRAINT `Cita_Vivienda` FOREIGN KEY (`Vivienda_idVivienda`) REFERENCES `vivienda` (`idVivienda`);
+
+--
+-- Filtros para la tabla `vivienda`
+--
+ALTER TABLE `vivienda`
+  ADD CONSTRAINT `Vivienda_TipoOferta` FOREIGN KEY (`TipoOferta_idTipoO`) REFERENCES `tipooferta` (`idTipoO`),
+  ADD CONSTRAINT `Vivienda_TipoVivienda` FOREIGN KEY (`TipoVivienda_idTipoV`) REFERENCES `tipovivienda` (`idTipoV`),
+  ADD CONSTRAINT `Vivienda_Zonas` FOREIGN KEY (`Zonas_idZona`) REFERENCES `zonas` (`idZona`);
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
