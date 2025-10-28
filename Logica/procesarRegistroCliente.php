@@ -1,4 +1,3 @@
-```php
 <?php
 // Procesa ALTA de CLIENTE
 
@@ -20,33 +19,36 @@ $GLOBALS['__POST_REDIRECT'] = '../registroCliente.php';
 require_once __DIR__ . '/bootstrap_post.php';  // valida POST/CSRF y crea $mysqli
 
 // ---------- Inputs ----------
-$nombre    = cap($_POST['nombre']    ?? '', 100);
-$apellido1 = cap($_POST['apellido']  ?? '', 100);
-$apellido2 = cap($_POST['apellido2'] ?? '', 100);
-$correo    = mb_strtolower(cap($_POST['correo'] ?? '', 100), 'UTF-8');
-$tel       = cap($_POST['telefono'] ?? '', 8);
-$dir       = cap($_POST['direccion']?? '', 150);
-$pwd       = (string)($_POST['password']  ?? '');
-$pwd2      = (string)($_POST['password2'] ?? '');
+$nombre   = cap($_POST['nombre']   ?? '', 100);
+$apellido = cap($_POST['apellido'] ?? '', 100);
+$usuarioI = cap($_POST['usuario']  ?? '', 100);
+$correo   = mb_strtolower(cap($_POST['correo'] ?? '', 100), 'UTF-8');
+$tel      = cap($_POST['telefono'] ?? '', 8);
+$dir      = cap($_POST['direccion']?? '', 150);
+$pwd      = (string)($_POST['password']  ?? '');
+$pwd2     = (string)($_POST['password2'] ?? '');
+
+// ---------- Usuario estandarizado ----------
+$usuario = sanitize_username_input($usuarioI, $nombre, $apellido);
+if (!preg_match('/^[a-z]+(\.[a-z0-9]+)*$/', $usuario)) {
+  $usuario = build_username_base($nombre, $apellido) ?: 'usuario';
+}
+$usuario = username_unico($mysqli, $usuario, 'cliente');
 
 // ---------- Validaciones ----------
 $err = [];
-if ($nombre==='' || $apellido1==='' || $apellido2==='')     $err[]='1';
-if (!filter_var($correo, FILTER_VALIDATE_EMAIL))            $err[]='2';
-if (!preg_match('/^\d{8}$/', $tel))                         $err[]='3';
-if ($dir==='')                                              $err[]='4';
-if ($pwd !== $pwd2)                                         $err[]='5';
-[$pwd_ok] = validar_password($pwd); if (!$pwd_ok)           $err[]='6';
-if (correo_existe($mysqli, $correo, 'cliente'))             $err[]='7';
-
+if ($nombre==='' || $apellido==='')                $err[]='1';
+if (!filter_var($correo, FILTER_VALIDATE_EMAIL))   $err[]='2';
+if (!preg_match('/^\d{8}$/', $tel))                $err[]='3';
+if ($dir==='')                                     $err[]='4';
+if ($pwd !== $pwd2)                                $err[]='5';
+[$pwd_ok] = validar_password($pwd); if (!$pwd_ok)  $err[]='6';
+if (correo_existe($mysqli, $correo, 'cliente'))    $err[]='7';
 
 if ($err){
   $_SESSION['flash_error']='No se pudo completar el registro. Revisa los datos.';
   header("Location: ../registroCliente.php"); exit;
 }
-
-// ---------- Usuario estandarizado (no editable) ----------
-$usuario = generar_usuario_estandarizado($mysqli, $nombre, $apellido1, $apellido2, 'cliente');
 
 // ---------- Bloqueos lógicos ----------
 $lockU = "cli:usr:".$usuario;
@@ -58,7 +60,6 @@ if (!get_named_lock($mysqli, $lockC, 5)) { release_named_lock($mysqli,$lockU); $
 // ---------- Transacción ----------
 $mysqli->begin_transaction();
 try {
-  // Doble verificación
   $s=$mysqli->prepare("SELECT 1 FROM cliente WHERE Usuario=? OR Correo=? LIMIT 1");
   $s->bind_param('ss',$usuario,$correo); $s->execute(); $s->store_result();
   if ($s->num_rows>0){ $s->close(); throw new RuntimeException('Duplicado'); }
@@ -67,22 +68,15 @@ try {
   $exp = (new DateTime('+60 days'))->format('Y-m-d H:i:s');
 
   $sql = "INSERT INTO cliente
-          (Nombre, Apellido, Apellido2, Usuario, Correo, Telefono, Direccion,
+          (Nombre, Apellido, Usuario, Correo, Telefono, Direccion,
            EstadoCuenta, IntentosFallidos, password_expires_at, is_deleted)
-          VALUES (?, ?, ?, ?, ?, ?, ?, 'Activo', 0, ?, 0)";
+          VALUES (?, ?, ?, ?, ?, ?, 'Activo', 0, ?, 0)";
   $stmt = $mysqli->prepare($sql);
-  $stmt->bind_param('ssssssss', $nombre, $apellido1, $apellido2, $usuario, $correo, $tel, $dir, $exp);
+  $stmt->bind_param('sssssss', $nombre, $apellido, $usuario, $correo, $tel, $dir, $exp);
   $stmt->execute();
-  $idCliente = (int)$stmt->insert_id;
+  $idCliente = $stmt->insert_id;
   $stmt->close();
 
-  // Código estandarizado único
-  $codigoUsuario = build_codigo_cliente($idCliente);
-  $u = $mysqli->prepare("UPDATE cliente SET CodigoUsuario=? WHERE idCliente=?");
-  $u->bind_param('si', $codigoUsuario, $idCliente);
-  $u->execute(); $u->close();
-
-  // Historial de contraseñas
   $hash = password_hash($pwd, PASSWORD_DEFAULT);
   $stmt = $mysqli->prepare("INSERT INTO password_history (user_type, user_id, PasswordHash)
                             VALUES ('cliente', ?, ?)");

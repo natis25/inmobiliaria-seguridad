@@ -1,20 +1,12 @@
 <?php
 function Conectarse()
 {
-    // Configuración de conexión: por defecto usa puerto 3307
-    // Permite sobreescribir con variables de entorno: DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT
-    $host = getenv('DB_HOST') ?: '127.0.0.1';
-    $user = getenv('DB_USER') ?: 'root';
-    $pass = getenv('DB_PASS') ?: '';
-    $db   = getenv('DB_NAME') ?: 'droca';
-    $port = getenv('DB_PORT') ?: 3307;
-
-    // mysqli_connect(host, user, pass, dbname, port)
-    $link = @mysqli_connect($host, $user, $pass, $db, (int)$port);
-    if (!$link) {
+    if (!($link = mysqli_connect("localhost", "root"))) {
         return 0;
     }
-
+    if (!mysqli_select_db($link, "droca")) {
+        return 0;
+    }
     return $link;
 }
 
