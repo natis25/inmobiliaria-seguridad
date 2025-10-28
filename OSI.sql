@@ -166,4 +166,4 @@ JOIN rol_permiso rp ON t.idRol = rp.idRol;
 ------------------------------------------------------
 
 
-------- Contrasena del OSI: KamiJime21Marti03.?
+------- Contrasena del OSI: KamiJime21Marti03.?OSI

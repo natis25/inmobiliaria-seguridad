@@ -227,4 +227,8 @@ CREATE TABLE password_history (
   PasswordHash VARCHAR(255) NOT NULL,
   FechaCambio DATETIME DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_pwdhist_user (user_type, user_id)
+<<<<<<< HEAD
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+=======
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+>>>>>>> origin/eduardo/registro-usuarios

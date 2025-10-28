@@ -21,4 +21,8 @@ if (!$mysqli) {
   $_SESSION['flash_error'] = 'Sin conexión a la base de datos.';
   header("Location: {$__POST_REDIRECT}"); exit;
 }
+<<<<<<< HEAD
 $mysqli->set_charset('utf8mb4');
+=======
+$mysqli->set_charset('utf8mb4');
+>>>>>>> origin/eduardo/registro-usuarios

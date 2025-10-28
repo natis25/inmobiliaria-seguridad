@@ -92,4 +92,8 @@ function get_named_lock($db, $name, $timeout=5){
 function release_named_lock($db, $name){
   $sql="SELECT RELEASE_LOCK(?)";
   $s=$db->prepare($sql); $s->bind_param('s',$name); $s->execute(); $s->close();
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/eduardo/registro-usuarios

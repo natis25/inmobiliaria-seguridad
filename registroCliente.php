@@ -179,4 +179,8 @@ pwd.addEventListener('input', e=>evalPwd(e.target.value));
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" nonce="<?= $CSP_NONCE ?>"></script>
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> origin/eduardo/registro-usuarios

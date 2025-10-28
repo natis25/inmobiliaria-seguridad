@@ -95,4 +95,8 @@ try {
 } finally {
   release_named_lock($mysqli,$lockC);
   release_named_lock($mysqli,$lockU);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/eduardo/registro-usuarios
